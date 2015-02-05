@@ -26,7 +26,7 @@ void setup() {
 
 void loop() {
   if(Serial.available() > -1){
-    //First mouse thingy
+    /*First mouse thingy
     mouse1Val = mouse1.read(DELTA_X_REG);
     Serial.write(mouse1Val);
     mouse1Val = mouse1.read(DELTA_Y_REG);
@@ -40,19 +40,16 @@ void loop() {
     Serial.write(mouse2Val);
     surface = mouse2.read(SQUAL_REG);
     Serial.write(surface);
-    
+    */
     //Magometer, reads and write
     MagnetometerRaw raw = compass.ReadRawAxis();
-    MagnetometerScaled scaled = compass.ReadScaledAxis();
-    float heading = atan2(scaled.YAxis, scaled.XAxis);
-    float declinationAngle = 0.0457;
-    heading += declinationAngle;
-    float headingDegrees = heading * 180/M_PI; 
-    Serial.println(scaled.XAxis);
-    Serial.println(scaled.YAxis);
-    Serial.println(scaled.ZAxis);
+    Serial.print(raw.XAxis);
+    Serial.print('\t');
+    Serial.print(raw.YAxis);
+    Serial.print('\t');
+    Serial.println(raw.ZAxis);
 }
-delay(300); 
+delay(30); 
 }
 /*
 mousel
