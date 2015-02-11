@@ -1,12 +1,10 @@
 #include <Boards.h>
 #include <Firmata.h>
-
 #include <HMC5883L.h>
 #include <Wire.h>
 #include <adns2620.h>
 ADNS2620 mouse1(3,4);
 ADNS2620 mouse2(8,5);
-
 char mouse1Val;
 char mouse2Val;
 char surface;
@@ -23,6 +21,18 @@ int roboX;
 int roboY;
 int rotation;
 int elevatorLevel;
+int ledElevatorPin = 11;
+int ledElevator;
+int ledTimePin = 7;
+const int ledPin =  13;      // the number of the LED pin
+
+// Variables will change:
+int ledState = LOW;             // ledState used to set the LED
+long previousMillis = 0;        // will store last time LED was updated
+
+// the follow variables is a long because the time, measured in miliseconds,
+// will quickly become a bigger number than can be stored in an int.
+long interval = 1000; 
 void setup() {
     mouse1.begin();
     delay(100);
@@ -36,7 +46,6 @@ void setup() {
     Wire.begin();
     compass = HMC5883L();
     compass.SetMeasurementMode(Measurement_Continuous);
-
 }
 
 void loop() {
@@ -45,6 +54,7 @@ void loop() {
     if (alliance){
       Serial.print("Blue Team");
       Serial.print("\t");
+      
     }
     if(!alliance){
       Serial.print("Red Team");
@@ -130,30 +140,37 @@ void loop() {
       case 0:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");
+      ledElevator = 0;
       break;
       case 1:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");
+      ledElevator = 42.5;
       break;
       case 2:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");
+      ledElevator = 85;
       break;
       case 3:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");  //do yes
+      ledElevator = 127.5;
       break;
       case 4:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");  //do yes
+      ledElevator = 170;
       break;
       case 5:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");  //do yes
+      ledElevator = 212.5;
       break;
       case 6:
       Serial.print(getElevatorLevel(byte2, 5));
       Serial.print("\t");  //do yes
+      ledElevator = 255;
       break;
       
   }
@@ -161,33 +178,55 @@ void loop() {
       case 0:
       Serial.print(getCurrentTime(byte2, 2));
       Serial.print("\t");
+      digitalWrite(ledTimePin, LOW);
       break;
       case 15:
       Serial.print(getCurrentTime(byte2, 2));
+      digitalWrite(ledTimePin, HIGH);
       Serial.print("\t");
       break;
       case 35:
       Serial.print(getCurrentTime(byte2, 2));
       Serial.print("\t");  //do yes
+      digitalWrite(ledTimePin, LOW);
       break;
       case 55:
       Serial.print(getCurrentTime(byte2, 2));
+      digitalWrite(ledTimePin, HIGH);
       Serial.print("\t");  //do yes
       break;
       case 75:
       Serial.print(getCurrentTime(byte2, 2));  //do yes
+      digitalWrite(ledTimePin, LOW);
       break;
       case 90:
       Serial.print(getCurrentTime(byte2, 2));
+      digitalWrite(ledTimePin, HIGH);
       Serial.print("\t");  //do yes
       break;
       case 105:
       Serial.print(getCurrentTime(byte2, 2));
+      digitalWrite(ledTimePin, LOW);
       Serial.print("\t");  //do yes
       break;
       case 120:
       Serial.print(getCurrentTime(byte2, 2));
       Serial.print("\t");  //do yes
+      unsigned long currentMillis = millis();
+ 
+  if(currentMillis - previousMillis > interval) {
+    // save the last time you blinked the LED 
+    previousMillis = currentMillis;   
+
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW)
+      ledState = HIGH;
+    else
+      ledState = LOW;
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(ledPin, ledState);
+  }
       break;
       
   }
@@ -212,8 +251,10 @@ void loop() {
     Serial.write(raw.YAxis);
     Serial.write(raw.ZAxis);*/
     Serial.println("");
+    //Starts the writing to ;leds
+    analogWrite(ledElevatorPin, ledElevator);
   }
-delay(30); 
+delay(8); 
 }
 int getStation(byte a){
    bool a1 = bitRead(a, 6);
@@ -342,70 +383,3 @@ Byte 2 Bit 2-0 - Current Time
   101 = 120
 
 */
-/* Processing code for this example
- // Dimmer - sends bytes over a serial port
- // by David A. Mellis
- //This example code is in the public domain.
- 
- import processing.serial.*;
- Serial port;
- 
- void setup() {
- size(256, 150);
- 
- println("Available serial ports:");
- println(Serial.list());
- 
- // Uses the first port in this list (number 0).  Change this to
- // select the port corresponding to your Arduino board.  The last
- // parameter (e.g. 9600) is the speed of the communication.  It
- // has to correspond to the value passed to Serial.begin() in your
- // Arduino sketch.
- port = new Serial(this, Serial.list()[0], 9600);  
- 
- // If you know the name of the port used by the Arduino board, you
- // can specify it directly like this.
- //port = new Serial(this, "COM1", 9600);
- }
- 
- void draw() {
- // draw a gradient from black to white
- for (int i = 0; i < 256; i++) {
- stroke(i);
- line(i, 0, i, 150);
- }
- 
- // write the current X-position of the mouse to the serial port as
- // a single byte
- port.write(byte1);
- }
- */
-
-/* Max/MSP v5 patch for this example
- 
-----------begin_max5_patcher----------
-1008.3ocuXszaiaCD9r8uhA5rqAeHIa0aAMaAVf1S6hdoYQAsDiL6JQZHQ2M
-YWr+2KeX4vjnjXKKkKhhiGQ9MeyCNz+X9rnMp63sQvuB+MLa1OlOalSjUvrC
-ymEUytKuh05TKJWUWyk5nE9eSyuS6jesvHu4F4MxOuUzB6X57sPKWVzBLXiP
-xZtGj6q2vafaaT0.BzJfjj.p8ZPukazsQvpfcpFs8mXR3plh8BoBxURIOWyK
-rxspZ0YI.eTCEh5Vqp+wGtFXZMKe6CZc3yWZwTdCmYW.BBkdiby8v0r+ST.W
-sD9SdUkn8FYspPbqvnBNFtZWiUyLmleJWo0vuKzeuj2vpJLaWA7YiE7wREui
-FpDFDp1KcbAFcP5sJoVxp4NB5Jq40ougIDxJt1wo3GDZHiNocKhiIExx+owv
-AdOEAksDs.RRrOoww1Arc.9RvN2J9tamwjkcqknvAE0l+8WnjHqreNet8whK
-z6mukIK4d+Xknv3jstvJs8EirMMhxsZIusET25jXbX8xczIl5xPVxhPcTGFu
-xNDu9rXtUCg37g9Q8Yc+EuofIYmg8QdkPCrOnXsaHwYs3rWx9PGsO+pqueG2
-uNQBqWFh1X7qQG+3.VHcHrfO1nyR2TlqpTM9MDsLKNCQVz6KO.+Sfc5j1Ykj
-jzkn2jwNDRP7LVb3d9LtoWBAOnvB92Le6yRmZ4UF7YpQhiFi7A5Ka8zXhKdA
-4r9TRGG7V4COiSbAJKdXrWNhhF0hNUh7uBa4Mba0l7JUK+omjDMwkSn95Izr
-TOwkdp7W.oPRmNRQsiKeu4j3CkfVgt.NYPEYqMGvvJ48vIlPiyzrIuZskWIS
-xGJPcmPiWOfLodybH3wjPbMYwlbFIMNHPHFOtLBNaLSa9sGk1TxMzCX5KTa6
-WIH2ocxSdngM0QPqFRxyPHFsprrhGc9Gy9xoBjz0NWdR2yW9DUa2F85jG2v9
-FgTO4Q8qiC7fzzQNpmNpsY3BrYPVJBMJQ1uVmoItRhw9NrVGO3NMNzYZ+zS7
-3WTvTOnUydG5kHMKLqAOjTe7fN2bGSxOZDkMrBrGQ9J1gONBEy0k4gVo8qHc
-cxmfxVihWz6a3yqY9NazzUYkua9UnynadOtogW.JfsVGRVNEbWF8I+eHtcwJ
-+wLXqZeSdWLo+FQF6731Tva0BISKTx.cLwmgJsUTTvkg1YsnXmxDge.CDR7x
-D6YmX6fMznaF7kdczmJXwm.XSOOrdoHhNA7GMiZYLZZR.+4lconMaJP6JOZ8
-ftCs1YWHZI3o.sIXezX5ihMSuXzZtk3ai1mXRSczoCS32hAydeyXNEu5SHyS
-xqZqbd3ZLdera1iPqYxOm++v7SUSz
------------end_max5_patcher-----------
- */
