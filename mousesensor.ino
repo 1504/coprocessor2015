@@ -14,6 +14,7 @@ int error = 0;
 //Bits and bytes here
 byte byte1 = B11111111;
 byte byte2 = B01000000;
+unsigned char byte3[1];
 bool alliance;
 int station;
 bool gameMode;
@@ -52,13 +53,16 @@ void setup() {
     pinMode(ledPin, OUTPUT);
     pinMode(9, OUTPUT);
     pinMode(12, OUTPUT);
-    pinMode(1, OUTPUT);
+    pinMode(2, OUTPUT);
     pinMode(6, OUTPUT);
     pinMode(10, OUTPUT);
 }
 
 void loop() {
-  if(Serial.available() > -1){
+  if(Serial.available() > 1){
+    Serial.readBytes(byte3, 2);
+    byte3[0] = byte1;
+    byte3[1] = byte2;
     bool alliance = bitRead(byte1, 7);
     if (alliance){
       Serial.print("Blue Team");
@@ -80,13 +84,13 @@ void loop() {
       Serial.print("Station 2");
       Serial.print("\t");
       digitalWrite(9, HIGH);
-      digitalWrite(1, HIGH);
+      digitalWrite(2, HIGH);
       break;
       case 3:
       Serial.print("Station 3");
       Serial.print("\t");
       digitalWrite(9, HIGH);
-      digitalWrite(1, HIGH);
+      digitalWrite(2, HIGH);
       digitalWrite(12, HIGH);
       break;
     
@@ -419,7 +423,7 @@ Byte 2 Bit 2-0 - Current Time
   001 = 90
   100 = 105
   101 = 120
-//Pin Usage
+//Pin Usage (LED)
 13 - Timing Pin
 12 - Driver Station
 11 - Elevator
@@ -431,6 +435,6 @@ Byte 2 Bit 2-0 - Current Time
 5 - Mouse
 4 - Mouse
 3 - Mouse
-2 - 
-1 - Driver Station
+2 - Driver Station
+1 - 
 */
