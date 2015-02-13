@@ -12,8 +12,8 @@ char magX, magY, magZ;
 HMC5883L compass;
 int error = 0;
 //Bits and bytes here
-byte byte1 = 11101111;
-byte byte2 = 01001110;
+byte byte1 = B11111111;
+byte byte2 = B01000000;
 bool alliance;
 int station;
 bool gameMode;
@@ -23,13 +23,14 @@ int rotation;
 int elevatorLevel;
 int ledElevatorPin = 11;
 int ledElevator;
-int ledTimePin = 7;
+int ledTimePin = 13;
 const int ledPin =  13;      // the number of the LED pin
-
+int allianceLed = 7;
 // Variables will change:
 int ledState = LOW;             // ledState used to set the LED
 long previousMillis = 0;        // will store last time LED was updated
-
+int ledX;
+int ledY;
 // the follow variables is a long because the time, measured in miliseconds,
 // will quickly become a bigger number than can be stored in an int.
 long interval = 1000; 
@@ -46,6 +47,14 @@ void setup() {
     Wire.begin();
     compass = HMC5883L();
     compass.SetMeasurementMode(Measurement_Continuous);
+    pinMode(ledElevatorPin, OUTPUT);
+    pinMode(allianceLed, OUTPUT);
+    pinMode(ledPin, OUTPUT);
+    pinMode(9, OUTPUT);
+    pinMode(12, OUTPUT);
+    pinMode(1, OUTPUT);
+    pinMode(6, OUTPUT);
+    pinMode(10, OUTPUT);
 }
 
 void loop() {
@@ -54,7 +63,7 @@ void loop() {
     if (alliance){
       Serial.print("Blue Team");
       Serial.print("\t");
-      
+      digitalWrite(allianceLed, HIGH);
     }
     if(!alliance){
       Serial.print("Red Team");
@@ -65,14 +74,20 @@ void loop() {
       case 1:
       Serial.print("Station 1");
       Serial.print("\t");
+      digitalWrite(9, HIGH);
       break;
       case 2:
       Serial.print("Station 2");
       Serial.print("\t");
+      digitalWrite(9, HIGH);
+      digitalWrite(1, HIGH);
       break;
       case 3:
       Serial.print("Station 3");
       Serial.print("\t");
+      digitalWrite(9, HIGH);
+      digitalWrite(1, HIGH);
+      digitalWrite(12, HIGH);
       break;
     
     }
@@ -80,6 +95,21 @@ void loop() {
     if(gameMode){
       Serial.print("Auton");
       Serial.print("\t");
+       unsigned long currentMillis = millis();
+ 
+  if(currentMillis - previousMillis > interval) {
+    // save the last time you blinked the LED 
+    previousMillis = currentMillis;   
+    interval = interval-35;
+    // if the LED is off turn it on and vice-versa:
+    if (ledState == LOW)
+      ledState = HIGH;
+    else
+      ledState = LOW;
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(ledPin, ledState);
+  }
     }
     else{
       Serial.print("Teleop");
@@ -90,16 +120,22 @@ void loop() {
       case 0:
       Serial.print("Neutral");
       Serial.print("\t");
+      ledX = 127;
+      analogWrite(10,ledX);
       break;
       case 1:
       //Going right
       Serial.print("Right");
       Serial.print("\t");
+      ledX = 255;
+      analogWrite(10,ledX);
       break;
       case -1:
       //Going left
       Serial.print("Left");
       Serial.print("\t");
+      ledX = 0;
+      analogWrite(10,ledX);
       break;  
        }
     roboY = getDirection(byte1,1);
@@ -107,16 +143,22 @@ void loop() {
       case 0:
       Serial.print("Neutral");
       Serial.print("\t");
+      ledY = 127;
+      analogWrite(10,ledY);
       break;
       case 1:
       //Going up
       Serial.print("Upward");
       Serial.print("\t");
+      ledY = 255;
+      analogWrite(10,ledY);
       break;
       case -1:
       //Going down
       Serial.print("Downward");
       Serial.print("\t");
+      ledY = 0;
+      analogWrite(10,ledY);
       break;  
        }
     rotation = getDirection(byte2,7);
@@ -178,7 +220,7 @@ void loop() {
       case 0:
       Serial.print(getCurrentTime(byte2, 2));
       Serial.print("\t");
-      digitalWrite(ledTimePin, LOW);
+ 
       break;
       case 15:
       Serial.print(getCurrentTime(byte2, 2));
@@ -212,12 +254,14 @@ void loop() {
       case 120:
       Serial.print(getCurrentTime(byte2, 2));
       Serial.print("\t");  //do yes
+
+      //There are some fates worse than death 
       unsigned long currentMillis = millis();
  
   if(currentMillis - previousMillis > interval) {
     // save the last time you blinked the LED 
     previousMillis = currentMillis;   
-
+    interval = interval-35;
     // if the LED is off turn it on and vice-versa:
     if (ledState == LOW)
       ledState = HIGH;
@@ -227,10 +271,8 @@ void loop() {
     // set the LED with the ledState of the variable:
     digitalWrite(ledPin, ledState);
   }
-      break;
-      
+      break;  
   }
-    
     //First mouse thingy
     /*mouse1Val = mouse1.read(DELTA_X_REG);
     Serial.write(mouse1Val);
@@ -251,7 +293,7 @@ void loop() {
     Serial.write(raw.YAxis);
     Serial.write(raw.ZAxis);*/
     Serial.println("");
-    //Starts the writing to ;leds
+    //Starts the writing to leds
     analogWrite(ledElevatorPin, ledElevator);
   }
 delay(8); 
@@ -269,7 +311,6 @@ int getDirection(byte a, int bitNum){
    if(a1&&b1){return 1;}
    if(a1&&!b1){return 0;}
    if(b1&&!a1){return -1;}
-
 }
 int getElevatorLevel(byte a, int bitNum){
   bool a1 = bitRead(a, bitNum);
@@ -322,12 +363,9 @@ int getCurrentTime(byte a, int bitNum){
   if(a1&&!a2&&!a3){
     return 105;
   }
-  
   if(a1&&!a2&&a3){
     return 120;
   }
-   
-
 }
 /*
 mousel
@@ -381,5 +419,18 @@ Byte 2 Bit 2-0 - Current Time
   001 = 90
   100 = 105
   101 = 120
-
+//Pin Usage
+13 - Timing Pin
+12 - Driver Station
+11 - Elevator
+10 - X
+9 - Driver Station
+8 - Mouse
+7 - Alliance
+6 - Y
+5 - Mouse
+4 - Mouse
+3 - Mouse
+2 - 
+1 - Driver Station
 */
