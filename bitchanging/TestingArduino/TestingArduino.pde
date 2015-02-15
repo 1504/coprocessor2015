@@ -4,7 +4,7 @@
  
  import processing.serial.*;
  Serial port;
- 
+ String val;
  void setup() {
  size(256, 150);
  
@@ -33,4 +33,9 @@
  // write the current X-position of the mouse to the serial port as
  // a single byte
  port.write(mouseX);
+ port.write(mouseY);
+ val = port.readStringUntil('\n');
+ println(val);
+ delay(100);
  }
+
