@@ -13,7 +13,7 @@ HMC5883L compass;
 int error = 0;
 //Bits and bytes here
 byte byte1 = B11111111;
-byte byte2 = B01010000;
+byte byte2 = B01010000; 
 unsigned char byte3[1];
 bool alliance;
 int station;
@@ -49,7 +49,7 @@ void setup()
     mouse2.sync();
     mouse2.write(CONFIGURATION_REG, 0x01);
     Serial.begin(9600);
-    Wire.begin();
+    Wire.begin(2);
     compass = HMC5883L();
     compass.SetMeasurementMode(Measurement_Continuous);
     pinMode(ledElevatorPin, OUTPUT);
@@ -212,25 +212,25 @@ void loop()
             case 3:
             //(getElevatorLevel(byte2, 5));
             //("t");
-            //do yes
+            //do meth
             ledElevator = 127.5;
             break;
             case 4:
             //(getElevatorLevel(byte2, 5));
             //("t");
-            //do yes
+            //do meth
             ledElevator = 170;
             break;
             case 5:
             //(getElevatorLevel(byte2, 5));
             //("t");
-            //do yes
+            //do meth
             ledElevator = 212.5;
             break;
             case 6:
             //(getElevatorLevel(byte2, 5));
             //("t");
-            //do yes
+            //do meth
             ledElevator = 255;
             break;
         }
@@ -248,36 +248,36 @@ void loop()
             case 35:
             //(getCurrentTime(byte2, 2));
             //("t");
-            //do yes
+            //do meth
             digitalWrite(ledTimePin, LOW);
             break;
             case 55:
             //(getCurrentTime(byte2, 2));
             digitalWrite(ledTimePin, HIGH);
             //("t");
-            //do yes
+            //do meth
             break;
             case 75:
             //(getCurrentTime(byte2, 2));
-            //do yes
+            //do meth
             digitalWrite(ledTimePin, LOW);
             break;
             case 90:
             //(getCurrentTime(byte2, 2));
             digitalWrite(ledTimePin, HIGH);
             //("t");
-            //do yes
+            //do meth
             break;
             case 105:
             //(getCurrentTime(byte2, 2));
             digitalWrite(ledTimePin, LOW);
             //("t");
-            //do yes
+            //do meth
             break;
             case 120:
             //(getCurrentTime(byte2, 2));
             //("t");
-            //do yes
+            //do meth
             //There are some fates worse than death
             unsigned long currentMillis = millis();
             if(currentMillis - previousMillis > interval)
@@ -295,25 +295,7 @@ void loop()
             }
             break;
         }
-        //First mouse thingy
-        mouse1Val = mouse1.read(DELTA_X_REG);
-        Serial.write(mouse1Val);
-        mouse1Val = mouse1.read(DELTA_Y_REG);
-        Serial.write(mouse1Val);
-        surface = mouse1.read(SQUAL_REG);
-        Serial.write(surface);
-        //Second mouse thingy
-        mouse2Val = mouse2.read(DELTA_X_REG);
-        Serial.write(mouse2Val);
-        mouse2Val = mouse2.read(DELTA_Y_REG);
-        Serial.write(mouse2Val);
-        surface = mouse2.read(SQUAL_REG);
-        Serial.write(surface);
-        //Magnetometer, reads and write
-        MagnetometerRaw raw = compass.ReadRawAxis();
-        Serial.write(raw.XAxis);
-        Serial.write(raw.YAxis);
-        Serial.write(raw.ZAxis);
+       Wire.onRequest(writeData);
         //ln("");
         //Starts the writing to leds
         analogWrite(ledElevatorPin, ledElevator);
@@ -426,7 +408,29 @@ int getCurrentTime(byte a, int bitNum)
         return 120;
     }
 }
-
+void writeData(){
+ //First mouse thingy
+        mouse1Val = mouse1.read(DELTA_X_REG);
+        Wire.write(mouse1Val);
+        mouse1Val = mouse1.read(DELTA_Y_REG);
+        Wire.write(mouse1Val);
+        surface = mouse1.read(SQUAL_REG);
+        Wire.write(surface);
+        //Second mouse thingy
+        mouse2Val = mouse2.read(DELTA_X_REG);
+        Wire.write(mouse2Val);
+        mouse2Val = mouse2.read(DELTA_Y_REG);
+        Wire.write(mouse2Val);
+        surface = mouse2.read(SQUAL_REG);
+        Wire.write(surface);
+        //Magnetometer, reads and write
+        MagnetometerRaw raw = compass.ReadRawAxis();
+        Wire.write(raw.XAxis);
+        Wire.write(raw.YAxis);
+        Wire.write(raw.ZAxis);
+        byte1 =Wire.read();
+        byte2 = WIre.read();
+}
 /*
 mousel
 x
@@ -495,3 +499,6 @@ Byte 2 Bit 2-0 - Current Time
 1 - Serial
 0 - Serial
 */
+//FATES WORSE THAN DEATH (Anagram)//
+    ////A Drawback Gem Jet Yin////
+    
