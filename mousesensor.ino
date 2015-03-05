@@ -50,8 +50,8 @@ void setup()
     mouse2.write(CONFIGURATION_REG, 0x01);
     Serial.begin(9600);
     Wire.begin(2);
-    compass = HMC5883L();
-    compass.SetMeasurementMode(Measurement_Continuous);
+    //compass = HMC5883L();
+    //compass.SetMeasurementMode(Measurement_Continuous);
     pinMode(ledElevatorPin, OUTPUT);
     pinMode(allianceLed, OUTPUT);
     pinMode(ledPin, OUTPUT);
@@ -295,6 +295,7 @@ void loop()
             }
             break;
         }
+       Wire.onReceive(readData);
        Wire.onRequest(writeData);
         //ln("");
         //Starts the writing to leds
@@ -428,8 +429,11 @@ void writeData(){
         Wire.write(raw.XAxis);
         Wire.write(raw.YAxis);
         Wire.write(raw.ZAxis);
-        byte1 =Wire.read();
-        byte2 = WIre.read();
+}
+void readData(int count){
+        //cool cool
+        byte1 = Wire.read();
+        byte2 = Wire.read();
 }
 /*
 mousel
